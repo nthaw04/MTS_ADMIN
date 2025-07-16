@@ -15,7 +15,7 @@ Already a pro? Just edit this README.md and make it your own. Want to make it ea
 
 ```
 cd existing_repo
-git remote add origin http://git.fa.edu.vn/hcm25_cpl_react_01/fe_team_3.git
+git remote add origin https://github.com/nthaw04/MTS_ADMIN.git
 git branch -M main
 git push -uf origin main
 ```
