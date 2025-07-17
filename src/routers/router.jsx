@@ -1,6 +1,8 @@
 import { createBrowserRouter } from "react-router";
-import { Home } from "@/pages/Home/Home";
-import RootLayout from "@/layout/RootLayout"
+import RootLayout from "@/layout/RootLayout";
+import LoginPage from "@/pages/Login/LoginPage";
+import PrivateRoute from "@/utils/auth/PrivateRoute";
+import AdminPage from "@/pages/Admin/Admin";
 // import { NotFound } from "@/pages/NotFound/NotFound";
 
 const router = createBrowserRouter([
@@ -8,7 +10,15 @@ const router = createBrowserRouter([
     path: "/",
     element: <RootLayout />,
     children: [
-      { path: "", element: <Home /> },
+      { path: "", element: <LoginPage /> },
+      {
+        path: "admin",
+        element: (
+          <PrivateRoute>
+            <AdminPage />
+          </PrivateRoute>
+        ),
+      },
     ],
     // errorElement: <NotFound />,
   },
