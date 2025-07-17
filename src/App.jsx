@@ -1,13 +1,7 @@
-import '@/App.css'
-import { RouterProvider } from "react-router";
-import router from '@/routers/router.jsx';
+import "@/App.css";
 
 function App() {
-  return (
-    <div className="min-h-svh h-full">
-        <RouterProvider router={router} />
-    </div>
-  )
+  return <div className="min-h-svh h-full"></div>;
 }
 
-export default App
+export default App;
