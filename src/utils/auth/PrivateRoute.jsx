@@ -1,9 +1,15 @@
 /* eslint-disable react/prop-types */
 import { isAdmin } from "./auth";
-import { Navigate } from "react-router";
+import { Navigate, useLocation } from "react-router";
 
 const PrivateRoute = ({ children }) => {
-  return isAdmin() ? children : <Navigate to="/" replace />;
+  const location = useLocation();
+
+  return isAdmin() ? (
+    children
+  ) : (
+    <Navigate to="/" replace state={{ from: location }} />
+  );
 };
 
 export default PrivateRoute;
