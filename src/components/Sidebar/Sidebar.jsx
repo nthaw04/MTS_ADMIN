@@ -5,7 +5,7 @@ import {
   FileText,
   LayoutDashboard,
   Route,
-  Settings,
+  Bus,
   Ticket,
   Train,
   Users,
@@ -33,10 +33,16 @@ const menuItems = [
     description: "Tuyến tàu và trạm",
   },
   {
-    path: "/admin/tickets",
-    label: "Quản lý vé",
+    path: "/admin/busroute-management",
+    label: "Quản lý tuyến xe buýt",
+    icon: Bus,
+    description: "Các tuyến xe buýt và trạm",
+  },
+  {
+    path: "/admin/transactions",
+    label: "Quản lý giao dịch",
     icon: Ticket,
-    description: "Vé và giao dịch",
+    description: "Giao dịch mau vé tàu",
   },
   {
     path: "/admin/applications",

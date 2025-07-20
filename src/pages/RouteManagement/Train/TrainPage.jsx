@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,6 +9,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import useTerminals from "@/hooks/train/useTrains";
+import { getUserInfo } from "@/utils/auth/auth";
+import { formatVND } from "@/utils/formatCurrency";
 import {
   AlertTriangle,
   Clock,
@@ -18,51 +21,94 @@ import {
   Settings,
   Users,
 } from "lucide-react";
-
+import { useState } from "react";
+import { toast } from "react-toastify";
+import AddTerminalModal from "./components/AddTerminalModal";
 function TrainPage() {
-  const { terminals, loading, refetch } = useTerminals();
-  const routes = [
-    {
-      id: 1,
-      name: "Line 1",
-      color: "bg-blue-500",
-      stations: 12,
-      status: "active",
-      passengers: 1247,
-      avgTime: "45 phút",
-      lastUpdate: "2 phút trước",
-    },
-    {
-      id: 2,
-      name: "Line 2",
-      color: "bg-green-500",
-      stations: 8,
-      status: "active",
-      passengers: 892,
-      avgTime: "32 phút",
-      lastUpdate: "1 phút trước",
-    },
-    {
-      id: 3,
-      name: "Line 3",
-      color: "bg-red-500",
-      stations: 15,
-      status: "maintenance",
-      passengers: 0,
-      avgTime: "0 phút",
-      lastUpdate: "30 phút trước",
-    },
-    {
-      id: 4,
-      name: "Line 4",
-      color: "bg-purple-500",
-      stations: 10,
-      status: "active",
-      passengers: 1534,
-      avgTime: "38 phút",
-      lastUpdate: "3 phút trước",
-    },
-  ];
+  const {
+    terminals,
+    loading,
+    createTrainRoute,
+    createTerminal,
+    getRoutePriceBetween,
+    refetch,
+  } = useTerminals();
+  const user = getUserInfo();
+  const [showModal, setShowModal] = useState(false);
+  //form TẠO tuyến
+  const [createStart, setCreateStart] = useState("");
+  const [createEnd, setCreateEnd] = useState("");
+  const [createPrice, setCreatePrice] = useState("");
+  //form TRA giá
+  const [searchStart, setSearchStart] = useState("");
+  const [searchEnd, setSearchEnd] = useState("");
+  const [foundPrice, setFoundPrice] = useState(null);
+
+  const handleCreateTrainRoute = async (e) => {
+    e.preventDefault();
+    if (createStart === createEnd) {
+      toast.warn("Ga bắt đầu và kết thúc không được trùng nhau!");
+      return;
+    }
+    const body = {
+      userId: user.id,
+      price: parseInt(createPrice) * 1000,
+      startTerminal: parseInt(createStart),
+      endTerminal: parseInt(createEnd),
+    };
+    console.log("Sending createTrainRoute body:", body);
+    try {
+      await createTrainRoute(body);
+      toast.success("Tạo giá tuyến thành công");
+      setCreateStart("");
+      setCreateEnd("");
+      setCreatePrice("");
+    } catch (err) {
+      console.error("Create train route error:", err);
+      toast.error("Tạo tuyến thất bại!");
+    }
+  };
+
+  const handleSearchPrice = async (e) => {
+    e.preventDefault();
+    if (!searchStart || !searchEnd || searchStart === searchEnd) {
+      toast.warn("Vui lòng chọn 2 ga khác nhau!");
+      return;
+    }
+    try {
+      const res = await getRoutePriceBetween(
+        parseInt(searchStart),
+        parseInt(searchEnd)
+      );
+      if (res?.price) {
+        toast.success("Tìm thấy giá tuyến!");
+        setFoundPrice(res.price);
+      } else {
+        toast.error("Không có tuyến phù hợp!");
+        setFoundPrice(null);
+      }
+    } catch (err) {
+      console.error("Lỗi khi tra giá:", err);
+      toast.error("Lỗi khi tra giá tuyến!");
+      setFoundPrice(null);
+    }
+  };
+
+  const handleCreateTerminal = async ({ name, location }) => {
+    try {
+      await createTerminal({
+        userId: user.id,
+        name,
+        location,
+      });
+      toast.success("Tạo ga mới thành công!");
+      setShowModal(false);
+      refetch();
+    } catch (err) {
+      toast.error("Tạo ga mới thất bại!");
+      console.error(err);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -72,62 +118,18 @@ function TrainPage() {
           <h1 className="text-3xl font-bold text-gray-900">
             Quản lý tuyến đường
           </h1>
+
           <p className="text-gray-600 mt-1">
             Quản lý các tuyến tàu và trạm dừng
           </p>
         </div>
+
         <div className="flex items-center space-x-3">
-          <Button variant="outline">
-            <Settings className="w-4 h-4 mr-2" />
-            Cài đặt tuyến
-          </Button>
-          <Button>
+          <Button onClick={() => setShowModal(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Thêm tuyến mới
           </Button>
         </div>
-      </div>
-
-      {/* Route Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {routes.map((route) => (
-          <Card
-            key={route.id}
-            className="hover:shadow-lg transition-shadow duration-200"
-          >
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <div className={`w-4 h-4 rounded-full ${route.color}`}></div>
-                  <h3 className="font-bold text-lg">{route.name}</h3>
-                </div>
-                <Badge
-                  variant={route.status === "active" ? "default" : "secondary"}
-                >
-                  {route.status === "active" ? "Hoạt động" : "Bảo trì"}
-                </Badge>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Trạm dừng</span>
-                  <span className="font-medium">{route.stations}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Hành khách</span>
-                  <span className="font-medium">{route.passengers}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Thời gian TB</span>
-                  <span className="font-medium">{route.avgTime}</span>
-                </div>
-                <div className="text-xs text-gray-500 mt-2">
-                  Cập nhật: {route.lastUpdate}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
       </div>
 
       {/* Route Details */}
@@ -136,26 +138,87 @@ function TrainPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Route className="w-5 h-5 mr-2" />
-              Sơ đồ tuyến đường
+              <Route className="w-5 h-5 mr-2" /> Thiết lập giá giữa các chặng
             </CardTitle>
-            <CardDescription>
-              Bản đồ tổng quan các tuyến tàu điện ngầm
-            </CardDescription>
+
+            <CardDescription>Thiết lập giá vé giữa các ga</CardDescription>
           </CardHeader>
+
           <CardContent>
-            <div className="bg-gray-100 rounded-lg p-6 h-64 flex items-center justify-center">
-              <div className="text-center text-gray-500">
-                <Route className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>Sơ đồ tuyến đường sẽ được hiển thị tại đây</p>
-                <p className="text-sm">
-                  Tích hợp với Google Maps hoặc OpenStreetMap
-                </p>
+            <form onSubmit={handleCreateTrainRoute} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Ga bắt đầu
+                  </label>
+
+                  <select
+                    value={createStart}
+                    onChange={(e) => setCreateStart(e.target.value)}
+                    className="mt-1 block w-full border rounded-md p-2"
+                    required
+                  >
+                    <option value="">-- Chọn ga bắt đầu --</option>
+
+                    {terminals.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name} ({t.location})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Ga kết thúc
+                  </label>
+
+                  <select
+                    value={createEnd}
+                    onChange={(e) => setCreateEnd(e.target.value)}
+                    className="mt-1 block w-full border rounded-md p-2"
+                    required
+                  >
+                    <option value="">-- Chọn ga kết thúc --</option>
+
+                    {terminals
+                      .filter((t) => t.id !== parseInt(createStart))
+                      .map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name} ({t.location})
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Giá vé
+                  </label>
+
+                  <select
+                    value={createPrice}
+                    onChange={(e) => setCreatePrice(e.target.value)}
+                    className="mt-1 block w-full border rounded-md p-2"
+                    required
+                  >
+                    <option value="">-- Chọn giá vé --</option>
+                    {[7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20].map(
+                      (p) => (
+                        <option key={p} value={p}>
+                          {formatVND(p)}
+                        </option>
+                      )
+                    )}
+                  </select>
+                </div>
               </div>
-            </div>
+              <Button type="submit" className="mt-4">
+                Tạo tuyến
+              </Button>
+            </form>
           </CardContent>
         </Card>
-
         {/* Station Status */}
         <Card>
           <CardHeader>
@@ -163,10 +226,12 @@ function TrainPage() {
               <MapPin className="w-5 h-5 mr-2" />
               Dánh sách ga tàu
             </CardTitle>
+
             <CardDescription>
               Theo dõi hoạt động của các trạm dừng
             </CardDescription>
           </CardHeader>
+
           <CardContent>
             {loading ? (
               <div className="flex items-center justify-center p-4">
@@ -182,10 +247,12 @@ function TrainPage() {
                   >
                     <div className="flex items-center space-x-3">
                       <div className="w-3 h-3 rounded-full bg-green-500" />
+
                       <div>
                         <p className="font-medium text-gray-900">
                           {terminal.location}
                         </p>
+
                         <Badge variant="defaut" className="font-bold mt-1">
                           {terminal.name}
                         </Badge>
@@ -198,42 +265,85 @@ function TrainPage() {
           </CardContent>
         </Card>
       </div>
-
       {/* Route Performance */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
             <Clock className="w-5 h-5 mr-2" />
-            Hiệu suất tuyến đường
+            Tra cứu giá tuyến
           </CardTitle>
-          <CardDescription>
-            Thống kê hiệu suất và lưu lượng hành khách
-          </CardDescription>
+
+          <CardDescription>Tìm giá vé giữa 2 ga bất kỳ</CardDescription>
         </CardHeader>
+
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <Users className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-              <p className="text-2xl font-bold text-blue-600">3,673</p>
-              <p className="text-sm text-gray-600">Tổng hành khách hôm nay</p>
+          <form
+            onSubmit={handleSearchPrice}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"
+          >
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Ga bắt đầu
+              </label>
+
+              <select
+                value={searchStart}
+                onChange={(e) => setSearchStart(e.target.value)}
+                className="mt-1 block w-full border rounded-md p-2"
+              >
+                <option value="">-- Chọn ga bắt đầu --</option>
+
+                {terminals.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name} ({t.location})
+                  </option>
+                ))}
+              </select>
             </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <Clock className="w-8 h-8 text-green-600 mx-auto mb-2" />
-              <p className="text-2xl font-bold text-green-600">38.5</p>
-              <p className="text-sm text-gray-600">
-                Thời gian trung bình (phút)
-              </p>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Ga kết thúc
+              </label>
+
+              <select
+                value={searchEnd}
+                onChange={(e) => setSearchEnd(e.target.value)}
+                className="mt-1 block w-full border rounded-md p-2"
+              >
+                <option value="">-- Chọn ga kết thúc --</option>
+
+                {terminals
+                  .filter((t) => t.id !== parseInt(searchStart))
+                  .map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name} ({t.location})
+                    </option>
+                  ))}
+              </select>
             </div>
-            <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <Route className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-              <p className="text-2xl font-bold text-purple-600">96.2%</p>
-              <p className="text-sm text-gray-600">Tỷ lệ đúng giờ</p>
+
+            <div>
+              <Button type="submit" className="w-full">
+                Tra giá
+              </Button>
             </div>
-          </div>
+          </form>
+
+          {foundPrice !== null && (
+            <div className="mt-4 text-green-700 font-semibold text-lg">
+              Giá tuyến: {formatVND(foundPrice)}
+            </div>
+          )}
         </CardContent>
       </Card>
+      <AddTerminalModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        onSubmit={handleCreateTerminal}
+        nextTerminalId={terminals.length + 1}
+      />
     </div>
   );
 }
-
 export default TrainPage;

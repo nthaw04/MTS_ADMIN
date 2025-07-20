@@ -44,8 +44,10 @@ import { userApi } from "@/apis/user/userApi";
 function User() {
   const [searchTerm, setSearchTerm] = useState("");
   const [addOpen, setAddOpen] = useState(false);
-  const { users: fetchedUsers, loading, refetch } = useUsers();
   const [users, setUsers] = useState([]);
+  const [filterRole, setFilterRole] = useState("all");
+  const [showFilter, setShowFilter] = useState(false);
+  const { users: fetchedUsers, loading, refetch } = useUsers();
 
   useEffect(() => {
     if (!loading) {
@@ -60,7 +62,11 @@ function User() {
     const email = user.email?.toLowerCase() || "";
     const keyword = searchTerm.toLowerCase();
 
-    return fullName.includes(keyword) || email.includes(keyword);
+    const matchesSearch = fullName.includes(keyword) || email.includes(keyword);
+    const matchesRole =
+      filterRole === "all" || user.roleId === parseInt(filterRole);
+
+    return matchesSearch && matchesRole;
   });
 
   const getRoleInfo = (roleId) => {
@@ -191,10 +197,31 @@ function User() {
                   className="pl-10 w-64"
                 />
               </div>
-              <Button variant="outline" size="sm">
-                <Filter className="w-4 h-4 mr-2" />
-                Lọc
-              </Button>
+              <DropdownMenu open={showFilter} onOpenChange={setShowFilter}>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Filter className="w-4 h-4 mr-2" />
+                    Lọc
+                  </Button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end" sideOffset={8}>
+                  <DropdownMenuLabel>Lọc theo vai trò</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setFilterRole("all")}>
+                    Tất cả vai trò
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterRole("1")}>
+                    Admin
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterRole("2")}>
+                    Staff
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterRole("3")}>
+                    Passenger
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </CardHeader>
