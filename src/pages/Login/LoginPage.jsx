@@ -50,6 +50,8 @@ export default function LoginPage() {
         return;
       }
 
+      localStorage.setItem("userInfo", JSON.stringify(decoded));
+
       setToken(token);
       toast.success("Đăng nhập thành công!");
       navigate("/admin");

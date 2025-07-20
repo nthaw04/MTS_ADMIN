@@ -16,10 +16,63 @@ const useTerminals = () => {
     }
   };
 
+  const createTerminal = async ({ userId, name, location }) => {
+    try {
+      const res = await trainApi.createTerminal({ userId, name, location });
+      setTerminals((prev) => [...prev, res.data]);
+      return res.data;
+    } catch (err) {
+      console.error("Error loading terminals:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createTrainRoute = async ({
+    userId,
+    price,
+    startTerminal,
+    endTerminal,
+  }) => {
+    try {
+      await trainApi.createTrainRoute({
+        userId,
+        price,
+        startTerminal,
+        endTerminal,
+      });
+      await fetchTerminals();
+    } catch (err) {
+      console.error("Error loading terminals:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getRoutePriceBetween = async (startTerminal, endTerminal) => {
+    try {
+      const res = await trainApi.getRouteBetween({
+        startTerminal,
+        endTerminal,
+      });
+      return res.data;
+    } catch (err) {
+      console.error("Error fetching route price:", err);
+      return null;
+    }
+  };
+
   useEffect(() => {
     fetchTerminals();
   }, []);
 
-  return { terminals, loading, refetch: fetchTerminals };
+  return {
+    terminals,
+    loading,
+    createTrainRoute,
+    createTerminal,
+    getRoutePriceBetween,
+    refetch: fetchTerminals,
+  };
 };
 export default useTerminals;

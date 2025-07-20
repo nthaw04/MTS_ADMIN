@@ -22,6 +22,11 @@ export const decodeToken = (token) => {
   }
 };
 
+export const getUserInfo = () => {
+  const user = localStorage.getItem("userInfo");
+  return user ? JSON.parse(user) : null;
+};
+
 export const isAdmin = () => {
   const decodedToken = decodeToken(getToken());
   return decodedToken && decodedToken.role === "1";

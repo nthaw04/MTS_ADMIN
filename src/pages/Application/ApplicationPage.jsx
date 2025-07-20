@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+/* eslint-disable no-unused-vars */
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -9,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Table,
   TableBody,
@@ -29,8 +30,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,7 +44,6 @@ import {
   Clock,
   MoreHorizontal,
   Image as ImageIcon,
-  Download,
 } from "lucide-react";
 import usePriorityApplications from "@/hooks/priority/usePriorityApplications";
 import { toast } from "react-toastify";
@@ -58,6 +56,9 @@ function ApplicationPage() {
   const [selectedImageUrl, setSelectedImageUrl] = useState(null);
   const [isModalOpen, setModalOpen] = useState(false);
   const [reviewNote, setReviewNote] = useState("");
+  const [filterType, setFilterType] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
+
   const {
     applications,
     loading,
@@ -68,12 +69,23 @@ function ApplicationPage() {
     fetchDetail,
   } = usePriorityApplications();
 
-  //   const filteredApplications = applications.filter(
-  //     (app) =>
-  //       app.applicantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //       app.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //       app.email.toLowerCase().includes(searchTerm.toLowerCase())
-  //   );
+  const getTypeText = (type) => {
+    return type === "Student" ? "Sinh viên" : "Ưu tiên";
+  };
+
+  const filteredApplications = applications.filter((app) => {
+    const keyword = searchTerm.toLowerCase();
+
+    const matchesKeyword =
+      app.passengerName?.toLowerCase().includes(keyword) ||
+      app.studentId.toLowerCase().includes(keyword) ||
+      getTypeText(app.type).toLowerCase().includes(keyword);
+
+    const matchesType = filterType === "all" || app.type === filterType;
+    const matchesStatus = filterStatus === "all" || app.status === filterStatus;
+
+    return matchesKeyword && matchesType && matchesStatus;
+  });
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -105,10 +117,6 @@ function ApplicationPage() {
     return type === "Student"
       ? "bg-blue-100 text-blue-800"
       : "bg-purple-100 text-purple-800";
-  };
-
-  const getTypeText = (type) => {
-    return type === "Student" ? "Sinh viên" : "Ưu tiên";
   };
 
   const handleViewDetail = (id) => {
@@ -198,10 +206,6 @@ function ApplicationPage() {
             Xét duyệt đơn ưu tiên cho sinh viên và đối tượng ưu tiên
           </p>
         </div>
-        {/* <Button variant="outline">
-          <Download className="w-4 h-4 mr-2" />
-          Xuất báo cáo
-        </Button> */}
       </div>
 
       {/* Stats Cards */}
@@ -253,16 +257,32 @@ function ApplicationPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Tìm kiếm đơn..."
+                  placeholder="Tìm theo tên, loại đơn..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 w-64"
                 />
               </div>
-              <Button variant="outline" size="sm">
-                <Filter className="w-4 h-4 mr-2" />
-                Lọc
-              </Button>
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="border rounded px-2 py-1 text-sm text-gray-700"
+              >
+                <option value="all">Tất cả loại đơn</option>
+                <option value="Student">Sinh viên</option>
+                <option value="RevolutionaryContributor">Ưu tiên</option>
+              </select>
+
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="border rounded px-2 py-1 text-sm text-gray-700"
+              >
+                <option value="all">Tất cả trạng thái</option>
+                <option value="Pending">Chờ duyệt</option>
+                <option value="Approved">Đã duyệt</option>
+                <option value="Rejected">Từ chối</option>
+              </select>
             </div>
           </div>
         </CardHeader>
@@ -281,7 +301,7 @@ function ApplicationPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {applications.map((application) => (
+                {filteredApplications.map((application) => (
                   <TableRow key={application.id}>
                     <TableCell>
                       <div className="flex items-center space-x-3">

@@ -10,6 +10,8 @@ const useAuth = () => {
     if (token) {
       const decode = decodeToken(token);
       setUser(decode);
+      localStorage.setItem("userInfo", JSON.stringify(decode));
+      console.log("userInfo saved to localStorage");
     }
   }, []);
 
