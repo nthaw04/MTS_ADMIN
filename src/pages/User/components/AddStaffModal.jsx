@@ -9,7 +9,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 const AddStaffModal = ({ open, onClose, onSuccess }) => {
   const [form, setForm] = useState({
@@ -27,12 +28,26 @@ const AddStaffModal = ({ open, onClose, onSuccess }) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  useEffect(() => {
+    if (open) {
+      setForm({
+        userName: "",
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+      });
+      setError("");
+    }
+  }, [open]);
+
   const handleSubmit = async () => {
     setLoading(true);
     setError("");
     try {
       await userApi.createStafAccount(form);
       onSuccess();
+      toast.success("Tạo nhân viên mới thành công");
       onClose();
     } catch (err) {
       const message =

@@ -280,41 +280,43 @@ function User() {
                       </TableCell>
 
                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
+                        {user.roleId !== 1 && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
 
-                          <DropdownMenuContent
-                            side="left"
-                            align="start"
-                            sideOffset={4}
-                          >
-                            {user.isActive ? (
-                              <DropdownMenuItem
-                                className="text-red-600"
-                                onClick={() =>
-                                  handleChangeStatus(user.id, user.isActive)
-                                }
-                              >
-                                <UserX className="mr-2 h-4 w-4" />
-                                Ban người dùng
-                              </DropdownMenuItem>
-                            ) : (
-                              <DropdownMenuItem
-                                className="text-green-600"
-                                onClick={() =>
-                                  handleChangeStatus(user.id, user.isActive)
-                                }
-                              >
-                                <UserCheck className="mr-2 h-4 w-4" />
-                                Mở khóa người dùng
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                            <DropdownMenuContent
+                              side="left"
+                              align="start"
+                              sideOffset={4}
+                            >
+                              {user.isActive ? (
+                                <DropdownMenuItem
+                                  className="text-red-600"
+                                  onClick={() =>
+                                    handleChangeStatus(user.id, user.isActive)
+                                  }
+                                >
+                                  <UserX className="mr-2 h-4 w-4" />
+                                  Ban người dùng
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem
+                                  className="text-green-600"
+                                  onClick={() =>
+                                    handleChangeStatus(user.id, user.isActive)
+                                  }
+                                >
+                                  <UserCheck className="mr-2 h-4 w-4" />
+                                  Mở khóa người dùng
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
                       </TableCell>
                     </TableRow>
                   );
