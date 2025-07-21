@@ -49,6 +49,27 @@ const useTerminals = () => {
     }
   };
 
+  const updateTrainRoute = async ({
+    id,
+    price,
+    startTerminal,
+    endTerminal,
+  }) => {
+    try {
+      await trainApi.updateTrainRoute({
+        id,
+        price,
+        startTerminal,
+        endTerminal,
+      });
+      await fetchTerminals();
+    } catch (err) {
+      console.error("Error loading terminals:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getRoutePriceBetween = async (startTerminal, endTerminal) => {
     try {
       const res = await trainApi.getRouteBetween({
@@ -71,8 +92,10 @@ const useTerminals = () => {
     loading,
     createTrainRoute,
     createTerminal,
+    updateTrainRoute,
     getRoutePriceBetween,
     refetch: fetchTerminals,
   };
 };
+
 export default useTerminals;
