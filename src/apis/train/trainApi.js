@@ -7,13 +7,21 @@ export const trainApi = {
     return axiosConfig.post("/Terminal/create-terminal", data);
   },
 
+  getAllTrainRoute: () => {
+    return axiosConfig.get("/TrainRoutes/GetAll");
+  },
+
   createTrainRoute: (data) => {
     axiosConfig.post("/TrainRoutes/Create", data);
   },
 
+  updateTrainRoute: (data) => {
+    axiosConfig.put("/TrainRoutes/Update", data);
+  },
+
   getRouteBetween: ({ startTerminal, endTerminal }) => {
-    return axiosConfig.get("/TrainRoutes/GetTrainRoute", {
-      data: startTerminal,
+    return axiosConfig.post("/TrainRoutes/GetTrainRoute", {
+      startTerminal,
       endTerminal,
     });
   },

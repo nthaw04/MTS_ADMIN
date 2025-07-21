@@ -24,6 +24,7 @@ import {
 import { useState } from "react";
 import { toast } from "react-toastify";
 import AddTerminalModal from "./components/AddTerminalModal";
+import TrainRoutesTable from "./components/TrainRoutesTable";
 function TrainPage() {
   const {
     terminals,
@@ -332,7 +333,7 @@ function TrainPage() {
 
           {foundPrice !== null && (
             <div className="mt-4 text-green-700 font-semibold text-lg">
-              Giá tuyến: {formatVND(foundPrice)}
+              Giá tuyến: {foundPrice.toLocaleString("vi-VN")}₫
             </div>
           )}
         </CardContent>
@@ -343,6 +344,7 @@ function TrainPage() {
         onSubmit={handleCreateTerminal}
         nextTerminalId={terminals.length + 1}
       />
+      <TrainRoutesTable />
     </div>
   );
 }
