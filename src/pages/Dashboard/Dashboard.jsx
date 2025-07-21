@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import useDashboard from "@/hooks/dashboard/useDashboard";
 import {
   Activity,
   AlertTriangle,
@@ -21,10 +22,12 @@ import {
 } from "lucide-react";
 
 function Dashboard() {
+
+  const { trainRoutes, transactions, busRoutes, users, terminals, loading, error, refetch } = useDashboard();
   const stats = [
     {
       title: "Tổng người dùng",
-      value: "12,847",
+      value: users?.length || 0,
       change: "+12.5%",
       trend: "up",
       icon: Users,
@@ -40,7 +43,7 @@ function Dashboard() {
     },
     {
       title: "Tuyến đường hoạt động",
-      value: "24",
+      value: trainRoutes?.length || 0,
       change: "0%",
       trend: "stable",
       icon: Route,
@@ -140,39 +143,36 @@ function Dashboard() {
                         <ArrowDownRight className="w-4 h-4 text-red-600 mr-1" />
                       )}
                       <span
-                        className={`text-sm font-medium ${
-                          stat.trend === "up"
-                            ? "text-green-600"
-                            : stat.trend === "down"
+                        className={`text-sm font-medium ${stat.trend === "up"
+                          ? "text-green-600"
+                          : stat.trend === "down"
                             ? "text-red-600"
                             : "text-gray-600"
-                        }`}
+                          }`}
                       >
                         {stat.change}
                       </span>
                     </div>
                   </div>
                   <div
-                    className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                      stat.color === "blue"
-                        ? "bg-blue-100"
-                        : stat.color === "green"
+                    className={`w-12 h-12 rounded-lg flex items-center justify-center ${stat.color === "blue"
+                      ? "bg-blue-100"
+                      : stat.color === "green"
                         ? "bg-green-100"
                         : stat.color === "purple"
-                        ? "bg-purple-100"
-                        : "bg-orange-100"
-                    }`}
+                          ? "bg-purple-100"
+                          : "bg-orange-100"
+                      }`}
                   >
                     <Icon
-                      className={`w-6 h-6 ${
-                        stat.color === "blue"
-                          ? "text-blue-600"
-                          : stat.color === "green"
+                      className={`w-6 h-6 ${stat.color === "blue"
+                        ? "text-blue-600"
+                        : stat.color === "green"
                           ? "text-green-600"
                           : stat.color === "purple"
-                          ? "text-purple-600"
-                          : "text-orange-600"
-                      }`}
+                            ? "text-purple-600"
+                            : "text-orange-600"
+                        }`}
                     />
                   </div>
                 </div>
@@ -204,13 +204,12 @@ function Dashboard() {
                 >
                   <div className="flex items-center space-x-3">
                     <div
-                      className={`w-3 h-3 rounded-full ${
-                        route.status === "active"
-                          ? "bg-green-500"
-                          : route.status === "maintenance"
+                      className={`w-3 h-3 rounded-full ${route.status === "active"
+                        ? "bg-green-500"
+                        : route.status === "maintenance"
                           ? "bg-yellow-500"
                           : "bg-red-500"
-                      }`}
+                        }`}
                     ></div>
                     <div>
                       <p className="font-medium text-gray-900">{route.name}</p>
@@ -225,15 +224,15 @@ function Dashboard() {
                         route.status === "active"
                           ? "default"
                           : route.status === "maintenance"
-                          ? "secondary"
-                          : "destructive"
+                            ? "secondary"
+                            : "destructive"
                       }
                     >
                       {route.status === "active"
                         ? "Hoạt động"
                         : route.status === "maintenance"
-                        ? "Bảo trì"
-                        : "Dừng"}
+                          ? "Bảo trì"
+                          : "Dừng"}
                     </Badge>
                     {route.delay > 0 && (
                       <p className="text-xs text-orange-600 mt-1">
@@ -263,13 +262,12 @@ function Dashboard() {
               {recentActivities.map((activity) => (
                 <div key={activity.id} className="flex items-start space-x-3">
                   <div
-                    className={`w-2 h-2 rounded-full mt-2 ${
-                      activity.status === "success"
-                        ? "bg-green-500"
-                        : activity.status === "warning"
+                    className={`w-2 h-2 rounded-full mt-2 ${activity.status === "success"
+                      ? "bg-green-500"
+                      : activity.status === "warning"
                         ? "bg-yellow-500"
                         : "bg-red-500"
-                    }`}
+                      }`}
                   ></div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-gray-900">{activity.message}</p>
