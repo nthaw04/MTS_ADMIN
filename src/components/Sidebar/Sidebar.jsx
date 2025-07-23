@@ -43,7 +43,7 @@ const menuItems = [
     path: "/admin/transactions",
     label: "Quản lý giao dịch",
     icon: Ticket,
-    description: "Giao dịch mau vé tàu",
+    description: "Giao dịch vé tàu",
   },
   {
     path: "/admin/applications",
