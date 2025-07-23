@@ -7,6 +7,7 @@ import ErrorScreen from "@/components/Error/ErrorScreen";
 import BusModal from "@/pages/RouteManagement/Bus/components/BusModal";
 import DeleteConfirmModal from "@/pages/RouteManagement/Bus/components/DeleteConfirmModal";
 import { toast } from "react-toastify";
+import { Button } from "@/components/ui/button";
 
 const BusPage = () => {
   const {
@@ -88,29 +89,28 @@ const BusPage = () => {
     <div className="">
       <div className="relative">
         {loading && <LoadingScreen />}
-        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mx-auto">
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                  <Bus className="w-8 h-8 mr-3 text-blue-600" />
                   Quản lý tuyến xe buýt
                 </h1>
                 <p className="text-gray-600 mt-2">
                   Quản lý thông tin các tuyến xe buýt và ga dừng
                 </p>
               </div>
-              <button
+              <Button
                 onClick={handleCreate}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl flex items-center space-x-2 font-medium"
+                className=" text-white px-6 py-3 rounded-lg transition-colors shadow-lg hover:shadow-xl flex items-center space-x-2 font-medium"
               >
                 <Plus className="w-5 h-5" />
                 <span>Thêm tuyến mới</span>
-              </button>
+              </Button>
             </div>
           </div>
 
-          {busRoutes.length === 0 ? (
+          {!loading && busRoutes.length === 0 ? (
             <div className="bg-white rounded-xl shadow-lg p-12 text-center">
               <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Bus className="w-12 h-12 text-gray-400" />
@@ -121,12 +121,12 @@ const BusPage = () => {
               <p className="text-gray-600 mb-6">
                 Bắt đầu bằng cách thêm tuyến xe buýt đầu tiên của bạn
               </p>
-              <button
+              <Button
                 onClick={handleCreate}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                className="text-white px-6 py-3 rounded-lg transition-colors font-medium"
               >
                 Thêm tuyến đầu tiên
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -153,13 +153,13 @@ const BusPage = () => {
                           </div>
                         </div>
                         <div className="flex space-x-2">
-                          {/* <button
+                          <button
                             onClick={() => handleEdit(busRoute)}
                             className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             title="Chỉnh sửa"
                           >
                             <Edit className="w-4 h-4" />
-                          </button> */}
+                          </button>
                           <button
                             onClick={() => handleDelete(busRoute)}
                             className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -175,7 +175,7 @@ const BusPage = () => {
                           <MapPin className="w-4 h-4 mr-2" />
                           Lộ trình
                         </h4>
-                        <div className="space-y-2">
+                        <div className="space-y-2 max-h-32 overflow-y-auto pr-2">
                           {routeTerminals.map((terminal, index) => (
                             <div key={terminal.id} className="flex items-center space-x-3">
                               <div className="flex-shrink-0">

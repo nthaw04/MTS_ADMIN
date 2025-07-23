@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import PropTypes from "prop-types";
+import { Button } from '@/components/ui/button';
 
 export const BusModal = ({
     isOpen,
@@ -76,7 +77,7 @@ export const BusModal = ({
     if (!isOpen) return null;
 
     return (
-        <div className="flex items-center justify-center pt-20">
+        <div className="flex items-center justify-center">
             <div className="fixed inset-0 bg-black opacity-50 flex items-center justify-center p-4 z-50"></div>
 
             <div className="fixed bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden z-60">
@@ -184,24 +185,25 @@ export const BusModal = ({
                     </div>
 
                     <div className="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
-                        <button
+                        <Button
                             type="button"
                             onClick={onClose}
-                            className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                            variant="outline"
+                            className="py-3 border text-gray-700 rounded-lg  transition-colors font-medium"
                         >
                             Hủy
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             type="submit"
                             disabled={isLoading}
-                            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                            className="py-3 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                         >
                             {isLoading
                                 ? 'Đang xử lý...'
                                 : busRoute
                                     ? 'Cập nhật'
                                     : 'Thêm mới'}
-                        </button>
+                        </Button>
                     </div>
                 </form>
             </div>

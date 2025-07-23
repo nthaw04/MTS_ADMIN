@@ -38,12 +38,12 @@ const menuItems = [
     icon: Bus,
     description: "Các tuyến xe buýt và trạm",
   },
-  // {
-  //   path: "/admin/transactions",
-  //   label: "Quản lý giao dịch",
-  //   icon: Ticket,
-  //   description: "Giao dịch mau vé tàu",
-  // },
+  {
+    path: "/admin/transactions",
+    label: "Quản lý giao dịch",
+    icon: Ticket,
+    description: "Giao dịch vé tàu",
+  },
   {
     path: "/admin/applications",
     label: "Đơn xét duyệt",
