@@ -9,6 +9,7 @@ import {
   Ticket,
   Train,
   Users,
+  Banknote,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { NavLink } from "react-router";
@@ -38,17 +39,23 @@ const menuItems = [
     icon: Bus,
     description: "Các tuyến xe buýt và trạm",
   },
-  // {
-  //   path: "/admin/transactions",
-  //   label: "Quản lý giao dịch",
-  //   icon: Ticket,
-  //   description: "Giao dịch mau vé tàu",
-  // },
+  {
+    path: "/admin/transactions",
+    label: "Quản lý giao dịch",
+    icon: Ticket,
+    description: "Giao dịch mau vé tàu",
+  },
   {
     path: "/admin/applications",
     label: "Đơn xét duyệt",
     icon: FileText,
     description: "Xét duyệt ưu tiên",
+  },
+  {
+    path: "/admin/refund",
+    label: "Đơn hoàn tiền",
+    icon: Banknote,
+    description: "Xét duyệt yêu cầu hoàn tiền",
   },
 ];
 

@@ -19,6 +19,10 @@ export const trainApi = {
     axiosConfig.put("/TrainRoutes/Update", data);
   },
 
+  deleteTrainRoute: (id) => {
+    return axiosConfig.delete(`/TrainRoutes/${id}`);
+  },
+
   getRouteBetween: ({ startTerminal, endTerminal }) => {
     return axiosConfig.post("/TrainRoutes/GetTrainRoute", {
       startTerminal,

@@ -3,6 +3,7 @@ import RootLayout from "@/layout/RootLayout";
 import ApplicationPage from "@/pages/Application/ApplicationPage";
 import Dashboard from "@/pages/Dashboard/Dashboard";
 import LoginPage from "@/pages/Login/LoginPage";
+import RefundPage from "@/pages/Refund/RefundPage";
 import BusPage from "@/pages/RouteManagement/Bus/BusPage";
 import TrainPage from "@/pages/RouteManagement/Train/TrainPage";
 import TransactionManagement from "@/pages/Transaction/TransactionManagement";
@@ -33,8 +34,9 @@ const router = createBrowserRouter([
       { path: "user-management", element: <User /> },
       { path: "trainroute-management", element: <TrainPage /> },
       { path: "busroute-management", element: <BusPage /> },
-      // { path: "transactions", element: <TransactionManagement /> },
+      { path: "transactions", element: <TransactionManagement /> },
       { path: "applications", element: <ApplicationPage /> },
+      { path: "refund", element: <RefundPage /> },
     ],
   },
 ]);
