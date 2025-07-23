@@ -9,6 +9,7 @@ import {
   Ticket,
   Train,
   Users,
+  Banknote,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { NavLink } from "react-router";
@@ -49,6 +50,12 @@ const menuItems = [
     label: "Đơn xét duyệt",
     icon: FileText,
     description: "Xét duyệt ưu tiên",
+  },
+  {
+    path: "/admin/refund",
+    label: "Đơn hoàn tiền",
+    icon: Banknote,
+    description: "Xét duyệt yêu cầu hoàn tiền",
   },
 ];
 

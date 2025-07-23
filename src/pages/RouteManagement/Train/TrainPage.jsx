@@ -344,6 +344,7 @@ function TrainPage() {
         onSubmit={handleCreateTerminal}
         nextTerminalId={terminals.length + 1}
       />
+
       <TrainRoutesTable />
     </div>
   );

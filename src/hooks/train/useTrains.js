@@ -62,6 +62,13 @@ const useTerminals = () => {
         startTerminal,
         endTerminal,
       });
+      console.log("Sending update data:", {
+        id,
+        price,
+        startTerminal,
+        endTerminal,
+      });
+
       await fetchTerminals();
     } catch (err) {
       console.error("Error loading terminals:", err);
