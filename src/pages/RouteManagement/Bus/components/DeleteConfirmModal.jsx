@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { AlertTriangle, X } from 'lucide-react';
 import PropTypes from 'prop-types';
 
@@ -11,7 +12,7 @@ export const DeleteConfirmModal = ({
     if (!isOpen) return null;
 
     return (
-        <div className="flex items-center justify-center pt-20">
+        <div className="flex items-center justify-center">
             <div className="fixed inset-0 bg-black opacity-50 flex items-center justify-center p-4 z-50"></div>
 
             <div className="fixed bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden z-60">
@@ -42,19 +43,20 @@ export const DeleteConfirmModal = ({
                 </div>
 
                 <div className="flex justify-end space-x-3 p-6 border-t border-gray-200">
-                    <button
+                    <Button
                         onClick={onClose}
-                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                        variant="outline"
+                        className="py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                     >
                         Hủy
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         onClick={onConfirm}
                         disabled={isLoading}
-                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="px-3 bg-red-600 text-sm text-white font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         {isLoading ? 'Đang xóa...' : 'Xóa'}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,92 +11,106 @@ import {
 import useDashboard from "@/hooks/dashboard/useDashboard";
 import {
   Activity,
-  AlertTriangle,
-  ArrowDownRight,
-  ArrowUpRight,
-  CheckCircle,
-  Clock,
-  Route,
-  Ticket,
   TrendingUp,
+  Ticket,
   Users,
+  Route,
 } from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import CustomTooltip from "@/pages/Dashboard/components/CustomToolTip";
+import dayjs from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
+import { formatMoney } from "@/utils/formatCurrency";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import LoadingScreen from "@/components/Loading/LoadingScreen";
+import ErrorScreen from "@/components/Error/ErrorScreen";
 
 function Dashboard() {
+  dayjs.extend(isBetween);
+  const {
+    trainRoutes,
+    users,
+    ticketSummary,
+    transactionSummary,
+    loading,
+    error,
+    refetch,
+    slots,
+    years,
+  } = useDashboard();
 
-  const { trainRoutes, transactions, busRoutes, users, terminals, loading, error, refetch } = useDashboard();
+  const [activeChart, setActiveChart] = useState("ticket");
+
   const stats = [
     {
       title: "Tổng người dùng",
       value: users?.length || 0,
-      change: "+12.5%",
-      trend: "up",
       icon: Users,
       color: "blue",
     },
     {
-      title: "Vé đã bán hôm nay",
-      value: "3,421",
-      change: "+8.2%",
-      trend: "up",
+      title: "Vé đã bán",
+      value: ticketSummary.totalTickets || 0,
       icon: Ticket,
       color: "green",
     },
     {
       title: "Tuyến đường hoạt động",
       value: trainRoutes?.length || 0,
-      change: "0%",
-      trend: "stable",
       icon: Route,
       color: "purple",
     },
     {
-      title: "Doanh thu hôm nay",
-      value: "₫2.4M",
-      change: "-2.1%",
-      trend: "down",
+      title: "Tổng doanh thu",
+      value: formatMoney(transactionSummary?.totalRevenue || 0),
       icon: TrendingUp,
       color: "orange",
     },
   ];
 
-  const recentActivities = [
-    {
-      id: 1,
-      type: "user",
-      message: "Người dùng mới đăng ký: nguyen.van.a@email.com",
-      time: "2 phút trước",
-      status: "success",
-    },
-    {
-      id: 2,
-      type: "ticket",
-      message: "Vé tháng được mua cho tuyến Line 1",
-      time: "5 phút trước",
-      status: "success",
-    },
-    {
-      id: 3,
-      type: "system",
-      message: "Trạm Bến Thành tạm ngừng hoạt động",
-      time: "10 phút trước",
-      status: "warning",
-    },
-    {
-      id: 4,
-      type: "route",
-      message: "Tuyến Line 2 hoạt động bình thường",
-      time: "15 phút trước",
-      status: "success",
-    },
-  ];
+  const [selectedYear, setSelectedYear] = useState(dayjs().year());
+  const [selectedSlot, setSelectedSlot] = useState(null);
 
-  const routeStatus = [
-    { name: "Line 1", status: "active", passengers: 1247, delay: 0 },
-    { name: "Line 2", status: "active", passengers: 892, delay: 2 },
-    { name: "Line 3", status: "maintenance", passengers: 0, delay: 0 },
-    { name: "Line 4", status: "active", passengers: 1534, delay: 1 },
-  ];
+  const parsedSlot = selectedSlot ? JSON.parse(selectedSlot) : null;
+  const slotStart = parsedSlot?.start;
+  const slotEnd = parsedSlot?.end;
+
+  const filteredTicketData = selectedSlot
+    ? ticketSummary.dailyTicketSummary.filter((item) =>
+      dayjs(item.date).isBetween(slotStart, slotEnd, null, "[]")
+    )
+    : ticketSummary.dailyTicketSummary;
+
+  const filteredTransactionData = selectedSlot
+    ? transactionSummary.dailyTransactionSummary.filter((item) =>
+      dayjs(item.date).isBetween(slotStart, slotEnd, null, "[]")
+    )
+    : transactionSummary.dailyTransactionSummary;
+
+  useEffect(() => {
+    if (slots.length > 0 && !selectedSlot) {
+      const newestSlot = slots[0];
+      setSelectedSlot(
+        JSON.stringify({
+          start: newestSlot.start,
+          end: newestSlot.end,
+          label: newestSlot.label,
+        })
+      );
+      setSelectedYear(newestSlot.year);
+    }
+  }, [slots, selectedSlot]);
+
+  if (loading) return <LoadingScreen />;
+  if (error) return <ErrorScreen message={error} onRetry={refetch} />;
 
   return (
     <div className="space-y-6">
@@ -110,10 +125,6 @@ function Dashboard() {
             <Activity className="w-3 h-3 mr-1" />
             Hệ thống hoạt động
           </Badge>
-          <Button>
-            <TrendingUp className="w-4 h-4 mr-2" />
-            Xem báo cáo
-          </Button>
         </div>
       </div>
 
@@ -135,43 +146,25 @@ function Dashboard() {
                     <p className="text-2xl font-bold text-gray-900 mt-1">
                       {stat.value}
                     </p>
-                    <div className="flex items-center mt-2">
-                      {stat.trend === "up" && (
-                        <ArrowUpRight className="w-4 h-4 text-green-600 mr-1" />
-                      )}
-                      {stat.trend === "down" && (
-                        <ArrowDownRight className="w-4 h-4 text-red-600 mr-1" />
-                      )}
-                      <span
-                        className={`text-sm font-medium ${stat.trend === "up"
-                          ? "text-green-600"
-                          : stat.trend === "down"
-                            ? "text-red-600"
-                            : "text-gray-600"
-                          }`}
-                      >
-                        {stat.change}
-                      </span>
-                    </div>
                   </div>
                   <div
                     className={`w-12 h-12 rounded-lg flex items-center justify-center ${stat.color === "blue"
-                      ? "bg-blue-100"
-                      : stat.color === "green"
-                        ? "bg-green-100"
-                        : stat.color === "purple"
-                          ? "bg-purple-100"
-                          : "bg-orange-100"
+                        ? "bg-blue-100"
+                        : stat.color === "green"
+                          ? "bg-green-100"
+                          : stat.color === "purple"
+                            ? "bg-purple-100"
+                            : "bg-orange-100"
                       }`}
                   >
                     <Icon
                       className={`w-6 h-6 ${stat.color === "blue"
-                        ? "text-blue-600"
-                        : stat.color === "green"
-                          ? "text-green-600"
-                          : stat.color === "purple"
-                            ? "text-purple-600"
-                            : "text-orange-600"
+                          ? "text-blue-600"
+                          : stat.color === "green"
+                            ? "text-green-600"
+                            : stat.color === "purple"
+                              ? "text-purple-600"
+                              : "text-orange-600"
                         }`}
                     />
                   </div>
@@ -182,139 +175,135 @@ function Dashboard() {
         })}
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Route Status */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
+      {/* Chart Section */}
+      <Card className="mt-10">
+        <CardHeader className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+          <div>
             <CardTitle className="flex items-center">
-              <Route className="w-5 h-5 mr-2" />
-              Trạng thái tuyến đường
+              <TrendingUp className="w-5 h-5 mr-2" />
+              {activeChart === "ticket"
+                ? "Thống kê vé theo ngày"
+                : "Doanh thu và giao dịch theo ngày"}
             </CardTitle>
             <CardDescription>
-              Theo dõi hoạt động của các tuyến tàu điện ngầm
+              {activeChart === "ticket"
+                ? "Số lượng vé bán mỗi ngày"
+                : "Tổng doanh thu và số giao dịch mỗi ngày"}
             </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {routeStatus.map((route, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div
-                      className={`w-3 h-3 rounded-full ${route.status === "active"
-                        ? "bg-green-500"
-                        : route.status === "maintenance"
-                          ? "bg-yellow-500"
-                          : "bg-red-500"
-                        }`}
-                    ></div>
-                    <div>
-                      <p className="font-medium text-gray-900">{route.name}</p>
-                      <p className="text-sm text-gray-600">
-                        {route.passengers} hành khách
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <Badge
-                      variant={
-                        route.status === "active"
-                          ? "default"
-                          : route.status === "maintenance"
-                            ? "secondary"
-                            : "destructive"
-                      }
-                    >
-                      {route.status === "active"
-                        ? "Hoạt động"
-                        : route.status === "maintenance"
-                          ? "Bảo trì"
-                          : "Dừng"}
-                    </Badge>
-                    {route.delay > 0 && (
-                      <p className="text-xs text-orange-600 mt-1">
-                        Trễ {route.delay} phút
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+            <div className="flex items-center space-x-3 mt-2">
+              <span className="text-sm text-gray-700">Năm:</span>
+              <Select value={selectedYear} onValueChange={(value) => setSelectedYear(value)}>
+                <SelectTrigger className="w-[100px]">
+                  <span>{selectedYear}</span>
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((year) => (
+                    <SelectItem key={year} value={year}>{year}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-        {/* Recent Activities */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Clock className="w-5 h-5 mr-2" />
-              Hoạt động gần đây
-            </CardTitle>
-            <CardDescription>
-              Các sự kiện mới nhất trong hệ thống
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivities.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3">
-                  <div
-                    className={`w-2 h-2 rounded-full mt-2 ${activity.status === "success"
-                      ? "bg-green-500"
-                      : activity.status === "warning"
-                        ? "bg-yellow-500"
-                        : "bg-red-500"
-                      }`}
-                  ></div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-900">{activity.message}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {activity.time}
-                    </p>
-                  </div>
-                </div>
-              ))}
+              <span className="text-sm text-gray-700">Tuần:</span>
+              <Select value={selectedSlot} onValueChange={(value) => setSelectedSlot(value)}>
+                <SelectTrigger className="w-[150px]">
+                  <span>{parsedSlot?.label || "Chọn tuần"}</span>
+                </SelectTrigger>
+                <SelectContent>
+                  {slots
+                    .filter((slot) => slot.year == selectedYear)
+                    .map((slot, index) => (
+                      <SelectItem
+                        key={index}
+                        value={JSON.stringify({
+                          start: slot.start,
+                          end: slot.end,
+                          label: slot.label,
+                        })}
+                      >
+                        {slot.label}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Thao tác nhanh</CardTitle>
-          <CardDescription>Các chức năng thường sử dụng</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <Button variant="outline" className="h-20 flex flex-col space-y-2">
-              <Users className="w-6 h-6" />
-              <span className="text-xs">Thêm người dùng</span>
+          </div>
+          <div className="mt-4 lg:mt-0">
+            <Button
+              variant={activeChart === "ticket" ? "default" : "outline"}
+              onClick={() => setActiveChart("ticket")}
+              className="mr-2"
+            >
+              Vé
             </Button>
-            <Button variant="outline" className="h-20 flex flex-col space-y-2">
-              <Ticket className="w-6 h-6" />
-              <span className="text-xs">Tạo vé mới</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex flex-col space-y-2">
-              <Route className="w-6 h-6" />
-              <span className="text-xs">Quản lý tuyến</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex flex-col space-y-2">
-              <AlertTriangle className="w-6 h-6" />
-              <span className="text-xs">Báo cáo sự cố</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex flex-col space-y-2">
-              <CheckCircle className="w-6 h-6" />
-              <span className="text-xs">Kiểm tra hệ thống</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex flex-col space-y-2">
-              <TrendingUp className="w-6 h-6" />
-              <span className="text-xs">Xem thống kê</span>
+            <Button
+              variant={activeChart === "transaction" ? "default" : "outline"}
+              onClick={() => setActiveChart("transaction")}
+            >
+              Giao dịch
             </Button>
           </div>
+        </CardHeader>
+        <CardContent>
+          {(activeChart === "ticket" && filteredTicketData.length === 0) ||
+            (activeChart === "transaction" && filteredTransactionData.length === 0) ? (
+            <div className="flex items-center justify-center h-[400px] text-gray-500 text-lg">
+              Không có dữ liệu để hiển thị
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={400}>
+              <LineChart
+                data={
+                  activeChart === "ticket"
+                    ? filteredTicketData
+                    : filteredTransactionData
+                }
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={(date) => dayjs(date).format("DD/MM/YYYY")}
+                />
+                <YAxis />
+                <Tooltip content={<CustomTooltip chartType={activeChart} />} />
+                {activeChart === "ticket" ? (
+                  <>
+                    <Line
+                      type="monotone"
+                      dataKey="soldTickets"
+                      stroke="#4F46E5"
+                      name="Vé bán được"
+                      activeDot={{ r: 8 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="refundedTickets"
+                      stroke="#DC2626"
+                      name="Vé bị hoàn"
+                      activeDot={{ r: 8 }}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Line
+                      type="monotone"
+                      dataKey="purchaseRevenue"
+                      stroke="#16A34A"
+                      name="DT Mua vé"
+                      activeDot={{ r: 8 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="refundRevenue"
+                      stroke="#DC2626"
+                      name="DT Hoàn tiền"
+                      activeDot={{ r: 8 }}
+                    />
+                  </>
+                )}
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </CardContent>
       </Card>
     </div>
